@@ -1,0 +1,8 @@
+{
+  "name": "VHL Abroad Career Portal",
+  "description": "A premium consultancy platform for international students planning to study and settle in Germany, featuring program comparisons, language training modules, and administrative support services.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
