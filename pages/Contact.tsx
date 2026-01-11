@@ -126,7 +126,7 @@ const Contact: React.FC = () => {
 
           <div className="rounded-2xl overflow-hidden h-72 w-full relative group bg-gray-200 shadow-lg">
             <img 
-              src="https://images.unsplash.com/photo-1599946347371-68eb71b16afc?auto=format&fit=crop&q=80&w=800" 
+              src="https://lh3.googleusercontent.com/xksn1Iu9zVbDuxlagioZDCUQ0rTD7BbZAwRQ3DHlNzJc1d0rZ65srfsCW5V_EJeokuMzAUgjbIREO1r1tdVrPlDCKPCQVABssA=w3840-h2160-c-rw-v3" 
               className="w-full h-full object-cover" 
               alt="Berlin Brandenburg Gate" 
             />
