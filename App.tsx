@@ -176,27 +176,31 @@ const Footer: React.FC = () => (
         </div>
       </div>
       <div className="glass p-8 rounded-3xl text-charcoal dark:text-white">
-        <form className="space-y-4">
+        <form name="footer-contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" className="space-y-4">
+          <input type="hidden" name="form-name" value="footer-contact" />
+          <p className="hidden">
+            <label>Don't fill this out if you're human: <input name="bot-field" /></label>
+          </p>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest opacity-60">Full Name</label>
-              <input className="w-full bg-bg-light dark:bg-white/10 border-0 rounded-xl focus:ring-2 focus:ring-primary p-3" placeholder="Enter Name" type="text" />
+              <input name="fullName" className="w-full bg-bg-light dark:bg-white/10 border-0 rounded-xl focus:ring-2 focus:ring-primary p-3" placeholder="Enter Name" type="text" required />
             </div>
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest opacity-60">Phone</label>
-              <input className="w-full bg-bg-light dark:bg-white/10 border-0 rounded-xl focus:ring-2 focus:ring-primary p-3" placeholder="Enter Phone Number" type="tel" />
+              <input name="phone" className="w-full bg-bg-light dark:bg-white/10 border-0 rounded-xl focus:ring-2 focus:ring-primary p-3" placeholder="Enter Phone Number" type="tel" required />
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest opacity-60">Preferred Program</label>
-            <select className="w-full bg-bg-light dark:bg-white/10 border-0 rounded-xl focus:ring-2 focus:ring-primary p-3">
+            <select name="program" className="w-full bg-bg-light dark:bg-white/10 border-0 rounded-xl focus:ring-2 focus:ring-primary p-3" required>
               <option>Bachelors Degree</option>
               <option>Masters Degree</option>
               <option>Nursing Program</option>
               <option>Vocational Training (Ausbildung)</option>
             </select>
           </div>
-          <Link to="/login" className="w-full py-4 bg-primary text-white font-black rounded-xl hover:bg-primary-hover transition-all shadow-xl shadow-primary/20 flex items-center justify-center">Get My Free Roadmap</Link>
+          <button type="submit" className="w-full py-4 bg-primary text-white font-black rounded-xl hover:bg-primary-hover transition-all shadow-xl shadow-primary/20 flex items-center justify-center">Get My Free Roadmap</button>
           <p className="text-[10px] text-center opacity-50 uppercase tracking-tighter">By clicking, you agree to our privacy policy and terms.</p>
         </form>
       </div>

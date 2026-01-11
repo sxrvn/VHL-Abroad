@@ -156,7 +156,11 @@ const Contact: React.FC = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form name="consultation-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="space-y-6">
+              <input type="hidden" name="form-name" value="consultation-request" />
+              <p className="hidden">
+                <label>Don't fill this out if you're human: <input name="bot-field" /></label>
+              </p>
               {/* Personal Information */}
               <div className="space-y-4">
                 <h3 className="text-sm font-bold uppercase tracking-wider opacity-60">Personal Information</h3>
@@ -164,6 +168,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Full Name *</label>
                     <input 
+                      name="fullName"
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
@@ -175,6 +180,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Email Address *</label>
                     <input 
+                      name="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -187,6 +193,7 @@ const Contact: React.FC = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-bold">Phone Number *</label>
                   <input 
+                    name="phone"
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -204,6 +211,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Desired Degree *</label>
                     <select 
+                      name="desiredDegree"
                       value={formData.desiredDegree}
                       onChange={(e) => setFormData({ ...formData, desiredDegree: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 focus:ring-primary focus:border-primary"
@@ -220,6 +228,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Preferred Intake *</label>
                     <select 
+                      name="intakeYear"
                       value={formData.intakeYear}
                       onChange={(e) => setFormData({ ...formData, intakeYear: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 focus:ring-primary focus:border-primary"
@@ -236,6 +245,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Field of Interest *</label>
                     <select 
+                      name="fieldOfInterest"
                       value={formData.fieldOfInterest}
                       onChange={(e) => setFormData({ ...formData, fieldOfInterest: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 focus:ring-primary focus:border-primary"
@@ -258,6 +268,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Current Education Level</label>
                     <select 
+                      name="currentEducation"
                       value={formData.currentEducation}
                       onChange={(e) => setFormData({ ...formData, currentEducation: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 focus:ring-primary focus:border-primary"
@@ -274,6 +285,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">CGPA / Percentage</label>
                     <input 
+                      name="cgpa"
                       type="text"
                       value={formData.cgpa}
                       onChange={(e) => setFormData({ ...formData, cgpa: e.target.value })}
@@ -284,6 +296,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">German Language Level</label>
                     <select 
+                      name="germanLevel"
                       value={formData.germanLevel}
                       onChange={(e) => setFormData({ ...formData, germanLevel: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 focus:ring-primary focus:border-primary"
@@ -307,6 +320,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Preferred Country</label>
                     <select 
+                      name="preferredCountry"
                       value={formData.preferredCountry}
                       onChange={(e) => setFormData({ ...formData, preferredCountry: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 focus:ring-primary focus:border-primary"
@@ -320,6 +334,7 @@ const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Budget Range (per year)</label>
                     <select 
+                      name="budget"
                       value={formData.budget}
                       onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 focus:ring-primary focus:border-primary"
@@ -336,6 +351,7 @@ const Contact: React.FC = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-bold">Tell us more about your goals</label>
                   <textarea 
+                    name="background"
                     value={formData.background}
                     onChange={(e) => setFormData({ ...formData, background: e.target.value })}
                     className="w-full px-4 py-3 rounded-lg border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 focus:ring-2 focus:ring-primary focus:border-primary" 
