@@ -157,7 +157,27 @@ const Navbar: React.FC = () => {
   );
 };
 
-const Footer: React.FC = () => (
+const Footer: React.FC = () => {
+  const handleFooterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formElement = e.target as HTMLFormElement;
+    const formData = new FormData(formElement);
+    
+    try {
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData as any).toString(),
+      });
+      
+      alert('Thank you! We will contact you soon.');
+      formElement.reset();
+    } catch (error) {
+      alert('There was an error submitting the form. Please try again.');
+    }
+  };
+
+  return (
   <footer className="bg-bg-dark text-white py-20 px-6 md:px-20">
     <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-16">
       <div className="space-y-8">
@@ -176,7 +196,7 @@ const Footer: React.FC = () => (
         </div>
       </div>
       <div className="glass p-8 rounded-3xl text-charcoal dark:text-white">
-        <form name="footer-contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" className="space-y-4">
+        <form name="footer-contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleFooterSubmit} className="space-y-4">
           <input type="hidden" name="form-name" value="footer-contact" />
           <p className="hidden">
             <label>Don't fill this out if you're human: <input name="bot-field" /></label>
@@ -217,7 +237,8 @@ const Footer: React.FC = () => (
       <p>© 2026 VHL Abroad Career. All rights reserved.</p>
     </div>
   </footer>
-);
+  );
+};
 
 const AppContent: React.FC = () => {
   const location = useLocation();

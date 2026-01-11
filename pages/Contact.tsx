@@ -32,6 +32,17 @@ const Contact: React.FC = () => {
     setSuccess(null);
 
     try {
+      // Submit to Netlify Forms
+      const formElement = e.target as HTMLFormElement;
+      const netlifyFormData = new FormData(formElement);
+      
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(netlifyFormData as any).toString(),
+      });
+
+      // Also save to Supabase
       const { error: submitError } = await supabase
         .from('consultations')
         .insert([
