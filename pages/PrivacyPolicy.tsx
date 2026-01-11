@@ -188,9 +188,10 @@ const PrivacyPolicy: React.FC = () => {
           </p>
           <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
             <p className="font-semibold mb-2">VHL Abroad Career</p>
-            <p className="opacity-70 mb-1">Email: privacy@vhlabroad.com</p>
-            <p className="opacity-70 mb-1">Phone: +49 123 456789</p>
-            <p className="opacity-70">Address: Berlin, Germany</p>
+            <p className="opacity-70 mb-1">Email: info@vhlabroadcareer.com</p>
+            <p className="opacity-70 mb-1">Phone: +91 9172704933</p>
+            <p className="opacity-70 mb-1">WhatsApp: +91 9552375281</p>
+            <p className="opacity-70">Address: S NO 21/20, NEAR PRERANA SCHOOL, AMBEGAON BK, PUNE, HAVELI, MAHARASHTRA, INDIA, 411046</p>
           </div>
         </section>
 

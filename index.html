@@ -79,6 +79,81 @@
 <link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-bg-light dark:bg-bg-dark text-charcoal dark:text-white transition-colors duration-300">
+    <!-- Hidden forms for Netlify detection -->
+    <form name="footer-contact" netlify netlify-honeypot="bot-field" hidden>
+        <input type="text" name="fullName" />
+        <input type="tel" name="phone" />
+        <select name="program">
+            <option>Bachelors Degree</option>
+            <option>Masters Degree</option>
+            <option>Nursing Program</option>
+            <option>Vocational Training (Ausbildung)</option>
+        </select>
+    </form>
+
+    <form name="consultation-request" netlify netlify-honeypot="bot-field" hidden>
+        <input type="text" name="fullName" />
+        <input type="email" name="email" />
+        <input type="tel" name="phone" />
+        <select name="desiredDegree">
+            <option>Bachelors Program</option>
+            <option>Masters Program</option>
+            <option>MBA</option>
+            <option>PhD / Research</option>
+            <option>Nursing Program</option>
+            <option>Vocational Training (Ausbildung)</option>
+        </select>
+        <select name="intakeYear">
+            <option>Winter 2026</option>
+            <option>Summer 2026</option>
+            <option>Winter 2027</option>
+            <option>Summer 2027</option>
+        </select>
+        <select name="fieldOfInterest">
+            <option>Computer Science / IT</option>
+            <option>Mechanical Engineering</option>
+            <option>Electrical Engineering</option>
+            <option>Data Science / AI</option>
+            <option>Business Administration</option>
+            <option>Medicine / Healthcare</option>
+            <option>Architecture</option>
+            <option>Economics</option>
+            <option>Law</option>
+            <option>Nursing</option>
+            <option>Other</option>
+        </select>
+        <select name="currentEducation">
+            <option>High School (12th Grade)</option>
+            <option>Undergraduate (Bachelors)</option>
+            <option>Graduate (Masters)</option>
+            <option>Professional</option>
+        </select>
+        <input type="text" name="cgpa" />
+        <select name="germanLevel">
+            <option>None</option>
+            <option>A1</option>
+            <option>A2</option>
+            <option>B1</option>
+            <option>B2</option>
+            <option>C1</option>
+            <option>C2</option>
+        </select>
+        <select name="preferredCountry">
+            <option>Germany</option>
+            <option>Austria</option>
+            <option>Switzerland</option>
+            <option>Netherlands</option>
+        </select>
+        <select name="budget">
+            <option>Under €10,000</option>
+            <option>€10,000 - €15,000</option>
+            <option>€15,000 - €20,000</option>
+            <option>€20,000 - €30,000</option>
+            <option>Above €30,000</option>
+        </select>
+        <textarea name="background"></textarea>
+    </form>
+
     <div id="root"></div>
 <script type="module" src="/index.tsx"></script>
 </body>

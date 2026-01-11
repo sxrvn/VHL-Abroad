@@ -97,9 +97,9 @@ const Contact: React.FC = () => {
           <h3 className="text-xl font-bold">Get in Touch</h3>
           <div className="space-y-4">
             {[
-              { icon: 'phone', title: 'Call Now', val: '+49 123 456789', color: 'primary' },
-              { icon: 'chat_bubble', title: 'WhatsApp Support', val: 'Counselor available 24/7', color: 'green-500' },
-              { icon: 'mail', title: 'Email Us', val: 'support@vhl-abroad.com', color: 'blue-500' }
+              { icon: 'phone', title: 'Call Now', val: '+91 9172704933', color: 'primary' },
+              { icon: 'chat_bubble', title: 'WhatsApp Support', val: '+91 9552375281', color: 'green-500' },
+              { icon: 'mail', title: 'Email Us', val: 'info@vhlabroadcareer.com', color: 'blue-500' }
             ].map((card, i) => (
               <div key={i} className="flex gap-4 rounded-xl border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 p-5 items-start hover:shadow-md transition-shadow">
                 <div className={`p-3 rounded-lg bg-${card.color === 'primary' ? 'primary' : card.color}/10 text-${card.color === 'primary' ? 'primary' : card.color}`}>
@@ -122,7 +122,7 @@ const Contact: React.FC = () => {
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="bg-white/90 dark:bg-bg-dark/90 px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">pin_drop</span>
-                <span className="text-sm font-bold">Main HQ: Berlin, Germany</span>
+                <span className="text-sm font-bold">Main HQ: Pune, Maharashtra, India</span>
               </div>
             </div>
           </div>
