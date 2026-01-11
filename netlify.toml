@@ -13,7 +13,3 @@
 
 [functions]
   node_bundler = "esbuild"
-
-# Scheduled function to keep Supabase alive
-[[functions."keep-alive"]]
-  schedule = "0 */6 * * *"
