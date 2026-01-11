@@ -1,4 +1,4 @@
-import { Handler, schedule } from '@netlify/functions';
+import { schedule } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client with environment variables
@@ -11,8 +11,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Main handler function
-const handler: Handler = async (event, context) => {
+// Schedule the function to run every 6 hours (Supabase pauses after 1 week of inactivity)
+// Cron format: "0 */6 * * *" = At minute 0 past every 6th hour (00:00, 06:00, 12:00, 18:00 UTC)
+export const handler = schedule("0 */6 * * *", async () => {
   console.log('Keep-alive function triggered at:', new Date().toISOString());
   
   try {
@@ -57,11 +58,4 @@ const handler: Handler = async (event, context) => {
       }),
     };
   }
-};
-
-// Schedule the function to run every 6 hours (Supabase pauses after 1 week of inactivity)
-// Cron format: "0 */6 * * *" = At minute 0 past every 6th hour
-export { handler };
-export const config = {
-  schedule: "0 */6 * * *" // Runs at 00:00, 06:00, 12:00, 18:00 UTC daily
-};
+});
