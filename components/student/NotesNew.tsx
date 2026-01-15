@@ -88,7 +88,9 @@ const Notes: React.FC = () => {
       }
 
       // Increment view count (fire and forget)
-      supabase.rpc('increment_material_views', { material_id: materialId }).catch(console.error);
+      supabase.rpc('increment_material_views', { material_id: materialId }).then(
+        ({ error }) => error && console.error('Error incrementing views:', error)
+      );
     } catch (error) {
       console.error('Error:', error);
     }
