@@ -68,10 +68,12 @@ const Login: React.FC = () => {
         {/* Left Side - Branding */}
         <div className="hidden lg:flex flex-col gap-8">
           <div className="flex items-center gap-3">
-            <div className="size-12 transition-transform overflow-hidden">
-              <img src="/assets/red-logo.png" alt="VHL Logo" className="w-full h-full object-contain" />
+            <div className="size-14 rounded-xl bg-gradient-to-br from-primary to-red-600 flex items-center justify-center shadow-xl">
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 19h2v2H3v-2zm0-4h2v2H3v-2zm0-4h2v2H3v-2zm0-4h2v2H3V7zm0-4h2v2H3V3zm4 16h2v2H7v-2zm0-8h2v2H7v-2zm0-8h2v2H7V3zm4 16h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2V7zm0-4h2v2h-2V3zm4 16h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2V7zm0-4h2v2h-2V3zm4 16h2v2h-2v-2zm0-8h2v2h-2v-2zm0-8h2v2h-2V3z"/>
+              </svg>
             </div>
-            <h1 className="text-3xl font-black tracking-tight">VHL <span className="text-primary">ABROAD</span></h1>
+            <h1 className="text-3xl font-black tracking-tight">GERMAN <span className="text-primary">GATEWAY</span></h1>
           </div>
           
           <div className="space-y-6">
@@ -79,7 +81,7 @@ const Login: React.FC = () => {
               Start Your Journey to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">Germany</span>
             </h2>
             <p className="text-lg opacity-70 leading-relaxed">
-              Join over 2,500+ students who have successfully started their German education journey with VHL Abroad Career.
+              Join over 2,500+ students who have successfully started their German education journey with German Gateway.
             </p>
           </div>
 
@@ -102,7 +104,7 @@ const Login: React.FC = () => {
             <div className="flex -space-x-3">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="size-10 rounded-full border-2 border-white dark:border-bg-dark bg-gray-500 overflow-hidden">
-                  <img src={`https://picsum.photos/seed/${i*15}/40/40`} alt="student" />
+                  <img src={`https://picsum.photos/seed/${i*15}/80/80.webp`} alt="student" width="40" height="40" />
                 </div>
               ))}
             </div>
@@ -119,10 +121,12 @@ const Login: React.FC = () => {
             
             {/* Mobile Logo */}
             <div className="lg:hidden flex items-center gap-3 mb-8">
-              <div className="size-10 overflow-hidden">
-                <img src="/assets/red-logo.png" alt="VHL Logo" className="w-full h-full object-contain" />
+              <div className="size-12 rounded-xl bg-gradient-to-br from-primary to-red-600 flex items-center justify-center shadow-lg">
+                <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 19h2v2H3v-2zm0-4h2v2H3v-2zm0-4h2v2H3v-2zm0-4h2v2H3V7zm0-4h2v2H3V3zm4 16h2v2H7v-2zm0-8h2v2H7v-2zm0-8h2v2H7V3zm4 16h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2V7zm0-4h2v2h-2V3zm4 16h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2V7zm0-4h2v2h-2V3zm4 16h2v2h-2v-2zm0-8h2v2h-2v-2zm0-8h2v2h-2V3z"/>
+                </svg>
               </div>
-              <h1 className="text-2xl font-black tracking-tight">VHL <span className="text-primary">ABROAD</span></h1>
+              <h1 className="text-2xl font-black tracking-tight">GERMAN <span className="text-primary">GATEWAY</span></h1>
             </div>
 
             {/* Success Card for Signup Complete */}

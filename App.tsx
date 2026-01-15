@@ -12,7 +12,6 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import StudentDashboard from './pages/StudentDashboard';
 import AdminDashboard from './pages/AdminDashboard';
-import QuestionManagement from './components/admin/QuestionManagement';
 import ExamAttemptPage from './pages/ExamAttempt.tsx';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -22,13 +21,30 @@ const Navbar: React.FC = () => {
   const { user, profile, signOut } = useAuth();
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-solid border-charcoal/10 bg-white/80 dark:bg-bg-dark/80 backdrop-blur-md px-6 md:px-20 py-4">
       <div className="max-w-[1280px] mx-auto flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="size-8 transition-transform group-hover:scale-110 overflow-hidden">
-            <img src="/assets/red-logo.png" alt="VHL Logo" className="w-full h-full object-contain" />
+        <Link to="/" className="flex items-center gap-3">
+          <div className="size-8 overflow-hidden">
+            <img src="/assets/red-logo.png" alt="VHL Logo" className="w-full h-full object-contain" width="150" height="50" fetchPriority="high" />
           </div>
           <h1 className="text-xl font-black tracking-tight">VHL <span className="text-primary">ABROAD</span></h1>
         </Link>
@@ -45,7 +61,7 @@ const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center gap-4">
           {user ? (
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
@@ -58,12 +74,7 @@ const Navbar: React.FC = () => {
               </button>
               
               {dropdownOpen && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-10" 
-                    onClick={() => setDropdownOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-bg-dark rounded-xl shadow-xl border border-charcoal/10 dark:border-white/10 py-2 z-20">
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-bg-dark rounded-xl shadow-xl border border-charcoal/10 dark:border-white/10 py-2 z-20">
                     <div className="px-4 py-3 border-b border-charcoal/10 dark:border-white/10">
                       <p className="font-bold text-sm">{profile?.full_name}</p>
                       <p className="text-xs opacity-60">{user.email}</p>
@@ -81,13 +92,12 @@ const Navbar: React.FC = () => {
                         signOut();
                         setDropdownOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left"
                     >
-                      <span className="material-symbols-outlined text-sm">logout</span>
-                      <span className="text-sm font-semibold">Sign Out</span>
+                      <span className="material-symbols-outlined text-sm text-red-600">logout</span>
+                      <span className="text-sm font-semibold text-red-600">Sign Out</span>
                     </button>
                   </div>
-                </>
               )}
             </div>
           ) : (
@@ -158,16 +168,16 @@ const Navbar: React.FC = () => {
 };
 
 const Footer: React.FC = () => {
-  const handleFooterSubmit = async (e: React.FormEvent) => {
+  const handleFooterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formElement = e.target as HTMLFormElement;
+    const formElement = e.currentTarget;
     const formData = new FormData(formElement);
     
     try {
       await fetch('/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(formData as any).toString(),
+        body: new URLSearchParams(Array.from(formData.entries()) as [string, string][]).toString(),
       });
       
       alert('Thank you! We will contact you soon.');
@@ -187,7 +197,7 @@ const Footer: React.FC = () => {
           <div className="flex -space-x-3">
             {[1, 2, 3].map(i => (
               <div key={i} className="size-10 rounded-full border-2 border-bg-dark bg-gray-500 overflow-hidden">
-                <img src={`https://picsum.photos/seed/${i*20}/40/40`} alt="user" />
+                <img src={`https://picsum.photos/seed/${i*20}/80/80.webp`} alt="user" width="40" height="40" />
               </div>
             ))}
             <div className="size-10 rounded-full border-2 border-bg-dark bg-primary flex items-center justify-center text-[10px] font-bold">+1k</div>
@@ -242,8 +252,8 @@ const Footer: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-  const hideFooter = location.pathname === '/login' || location.pathname === '/dashboard' || location.pathname === '/admin';
-  const hideNavbar = location.pathname === '/dashboard' || location.pathname === '/admin';
+  const hideFooter = location.pathname === '/login' || location.pathname === '/dashboard' || location.pathname === '/admin' || location.pathname.startsWith('/exam/');
+  const hideNavbar = location.pathname === '/dashboard' || location.pathname === '/admin' || location.pathname.startsWith('/exam/');
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -275,14 +285,6 @@ const AppContent: React.FC = () => {
             } 
           />
           <Route 
-            path="/admin/questions/:examId" 
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <QuestionManagement />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
             path="/exam/:examId" 
             element={
               <ProtectedRoute requiredRole="student">
@@ -290,6 +292,7 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             } 
           />
+
         </Routes>
       </main>
       {!hideFooter && <Footer />}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Video } from '../../types';
@@ -11,10 +11,63 @@ const Notes: React.FC = () => {
   const [selectedNote, setSelectedNote] = useState<Video | null>(null);
   const [batchExpired, setBatchExpired] = useState(false);
   const [loading, setLoading] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const watchTimeInterval = useRef<NodeJS.Timeout | null>(null);
+  const startTime = useRef<number>(Date.now());
 
   useEffect(() => {
     if (user) fetchData();
   }, [user]);
+
+  useEffect(() => {
+    // Track progress when viewing a note
+    if (selectedNote) {
+      startTime.current = Date.now();
+      startProgressTracking();
+    }
+
+    return () => {
+      if (watchTimeInterval.current) {
+        clearInterval(watchTimeInterval.current);
+      }
+      if (selectedNote) {
+        // Save final progress when closing
+        saveProgress(selectedNote.id, 100, Math.floor((Date.now() - startTime.current) / 1000));
+      }
+    };
+  }, [selectedNote]);
+
+  const startProgressTracking = () => {
+    // Update progress every 30 seconds
+    watchTimeInterval.current = setInterval(() => {
+      if (selectedNote) {
+        const watchTime = Math.floor((Date.now() - startTime.current) / 1000);
+        updateProgress(selectedNote.id, 50, watchTime); // 50% for viewing
+      }
+    }, 30000);
+  };
+
+  const updateProgress = async (videoId: string, percentage: number, watchTime: number) => {
+    try {
+      const { error } = await supabase.from('learning_progress').upsert({
+        student_id: user?.id,
+        video_id: videoId,
+        watch_percentage: percentage,
+        completed: percentage >= 90,
+        last_watched_at: new Date().toISOString(),
+        total_watch_time: watchTime
+      });
+      
+      if (error) console.error('Error updating progress:', error);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const saveProgress = async (videoId: string, percentage: number, watchTime: number) => {
+    await updateProgress(videoId, percentage, watchTime);
+  };
 
   const fetchData = async () => {
     try {
@@ -45,11 +98,11 @@ const Notes: React.FC = () => {
 
   const getNoteTypeInfo = (url: string) => {
     if (url.includes('http') && (url.includes('youtube') || url.includes('vimeo') || url.includes('youtu.be'))) {
-      return { icon: '🎥', label: 'Video', bgGradient: 'from-purple-500/20 to-pink-500/20' };
+      return { icon: 'videocam', label: 'Video', bgGradient: 'from-purple-500/20 to-pink-500/20' };
     } else if (url.includes('.mp3') || url.includes('.wav') || url.includes('audio')) {
-      return { icon: '🎧', label: 'Audio', bgGradient: 'from-blue-500/20 to-cyan-500/20' };
+      return { icon: 'headphones', label: 'Audio', bgGradient: 'from-blue-500/20 to-cyan-500/20' };
     }
-    return { icon: '📄', label: 'Document', bgGradient: 'from-green-500/20 to-emerald-500/20' };
+    return { icon: 'description', label: 'Document', bgGradient: 'from-green-500/20 to-emerald-500/20' };
   };
 
   const handleViewNote = (note: Video) => {
@@ -96,8 +149,8 @@ const Notes: React.FC = () => {
               <Card key={note.id} hover padding="none" className="overflow-hidden group">
                 <div className={`aspect-video bg-gradient-to-br ${typeInfo.bgGradient} flex items-center justify-center relative overflow-hidden`}>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                  <div className="relative text-6xl transform group-hover:scale-110 transition-transform duration-300">
-                    {typeInfo.icon}
+                  <div className="relative transform group-hover:scale-110 transition-transform duration-300">
+                    <span className="material-symbols-outlined text-6xl">{typeInfo.icon}</span>
                   </div>
                   <div className="absolute top-4 right-4">
                     <Badge variant={badgeVariant} size="sm" className="shadow-lg">
@@ -211,15 +264,30 @@ const Notes: React.FC = () => {
                   );
                 }
               } else if (typeInfo.label === 'Audio') {
+                // Convert Google Drive preview URL to direct audio URL if needed
+                let audioUrl = selectedNote.video_url;
+                const driveFileIdMatch = audioUrl.match(/\/file\/d\/([^\/\?]+)/);
+                if (driveFileIdMatch && audioUrl.includes('drive.google.com')) {
+                  audioUrl = `https://drive.google.com/uc?export=view&id=${driveFileIdMatch[1]}`;
+                }
+                
                 return (
                   <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-6 text-center">
                     <span className="material-symbols-outlined text-5xl text-blue-600 mb-4">headphones</span>
-                    <audio controls className="w-full mb-4" preload="metadata">
-                      <source src={selectedNote.video_url} type="audio/mpeg" />
-                      Your browser does not support the audio element.
-                    </audio>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md mb-4">
+                      <audio controls className="w-full" preload="metadata">
+                        <source src={audioUrl} type="audio/mpeg" />
+                        <source src={audioUrl} type="audio/mp3" />
+                        <source src={audioUrl} type="audio/wav" />
+                        <source src={audioUrl} type="audio/ogg" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      If audio doesn't play, try downloading the file below.
+                    </p>
                     <Button
-                      onClick={() => window.open(selectedNote.video_url, '_blank')}
+                      onClick={() => window.open(driveFileIdMatch ? `https://drive.google.com/uc?export=download&id=${driveFileIdMatch[1]}` : selectedNote.video_url, '_blank')}
                       variant="primary"
                       icon="download"
                     >

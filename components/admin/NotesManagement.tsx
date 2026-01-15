@@ -136,11 +136,11 @@ const NotesManagement: React.FC = () => {
 
   const getNoteTypeIcon = (url: string) => {
     if (url.includes('http') || url.includes('youtube') || url.includes('vimeo')) {
-      return { icon: '🎥', label: 'Video', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' };
+      return { icon: 'videocam', label: 'Video', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' };
     } else if (url.includes('.mp3') || url.includes('.wav') || url.includes('audio')) {
-      return { icon: '🎧', label: 'Audio', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' };
+      return { icon: 'headphones', label: 'Audio', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' };
     }
-    return { icon: '📄', label: 'Document', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' };
+    return { icon: 'description', label: 'Document', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' };
   };
 
   if (loading) {
@@ -197,8 +197,8 @@ const NotesManagement: React.FC = () => {
                         className="bg-white dark:bg-white/5 rounded-2xl border border-charcoal/10 dark:border-white/10 p-6 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
                       >
                         <div className="flex items-start gap-4">
-                          <div className="size-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 flex items-center justify-center flex-shrink-0 text-3xl">
-                            {typeInfo.icon}
+                            <div className="size-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 flex items-center justify-center flex-shrink-0">
+                              <span className="material-symbols-outlined text-3xl">{typeInfo.icon}</span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-4">
@@ -229,7 +229,7 @@ const NotesManagement: React.FC = () => {
                                       : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-900/50'
                                   }`}
                                 >
-                                  {note.is_published ? '✓ Published' : 'Draft'}
+                                  {note.is_published ? 'Published' : 'Draft'}
                                 </button>
                                 <button
                                   onClick={() => openModal(note)}
@@ -311,9 +311,9 @@ const NotesManagement: React.FC = () => {
                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     {
                       [
-                      { value: 'document', icon: '📄', label: 'Document' },
-                      { value: 'audio', icon: '🎧', label: 'Audio' },
-                      { value: 'video', icon: '🎥', label: 'Video' },
+                      { value: 'document', icon: 'description', label: 'Document' },
+                      { value: 'audio', icon: 'headphones', label: 'Audio' },
+                      { value: 'video', icon: 'videocam', label: 'Video' },
                     ].map((type) => (
                       <button
                         key={type.value}
@@ -325,7 +325,7 @@ const NotesManagement: React.FC = () => {
                             : 'border-charcoal/10 dark:border-white/10 hover:border-primary/50'
                         }`}
                       >
-                        <div className="text-xl sm:text-2xl mb-1">{type.icon}</div>
+                        <span className="material-symbols-outlined text-xl sm:text-2xl mb-1 block">{type.icon}</span>
                         <div className="text-[10px] sm:text-xs font-semibold">{type.label}</div>
                       </button>
                     ))}

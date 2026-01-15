@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Exam, Batch, Question } from '../../types';
-import { useNavigate } from 'react-router-dom';
 
-const ExamManagement: React.FC = () => {
+interface ExamManagementProps {
+  onManageQuestions: (examId: string) => void;
+}
+
+const ExamManagement: React.FC<ExamManagementProps> = ({ onManageQuestions }) => {
   const [exams, setExams] = useState<Exam[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,10 +18,10 @@ const ExamManagement: React.FC = () => {
     batch_id: '',
     duration_minutes: 60,
     total_marks: 100,
+    passing_marks: 40,
     is_published: false,
     publish_result: false,
   });
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -43,9 +46,20 @@ const ExamManagement: React.FC = () => {
     e.preventDefault();
     try {
       if (editingExam) {
-        await supabase.from('exams').update(formData).eq('id', editingExam.id);
+        // Update exam
+        const { data: updatedExam } = await supabase
+          .from('exams')
+          .update(formData)
+          .eq('id', editingExam.id)
+          .select()
+          .single();
       } else {
-        await supabase.from('exams').insert([formData]);
+        // Insert new exam
+        await supabase
+          .from('exams')
+          .insert([formData])
+          .select()
+          .single();
       }
       fetchData();
       closeModal();
@@ -67,8 +81,16 @@ const ExamManagement: React.FC = () => {
 
   const deleteExam = async (id: string) => {
     if (!confirm('Delete exam and all questions?')) return;
-    await supabase.from('exams').delete().eq('id', id);
-    fetchData();
+    
+    try {
+      // Delete the exam
+      await supabase.from('exams').delete().eq('id', id);
+
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting exam:', error);
+      alert('Failed to delete exam');
+    }
   };
 
   const openModal = (exam?: Exam) => {
@@ -80,12 +102,13 @@ const ExamManagement: React.FC = () => {
         batch_id: exam.batch_id,
         duration_minutes: exam.duration_minutes,
         total_marks: exam.total_marks,
+        passing_marks: exam.passing_marks || Math.floor(exam.total_marks * 0.4),
         is_published: exam.is_published,
         publish_result: exam.publish_result,
       });
     } else {
       setEditingExam(null);
-      setFormData({ title: '', description: '', batch_id: '', duration_minutes: 60, total_marks: 100, is_published: false, publish_result: false });
+      setFormData({ title: '', description: '', batch_id: '', duration_minutes: 60, total_marks: 100, passing_marks: 40, is_published: false, publish_result: false });
     }
     setShowModal(true);
   };
@@ -174,11 +197,11 @@ const ExamManagement: React.FC = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-base mb-1">{exam.title}</h4>
-                      <p className="text-xs opacity-60">{exam.total_marks} marks · Pass: {exam.passing_percentage || 50}%</p>
+                      <p className="text-xs opacity-60">{exam.total_marks} marks · Pass: {exam.passing_marks || Math.floor(exam.total_marks * 0.4)}</p>
                     </div>
                     <div className="flex gap-1.5 flex-shrink-0">
                       <button
-                        onClick={() => navigate(`/admin/questions/${exam.id}`)}
+                        onClick={() => onManageQuestions(exam.id)}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                         title="Manage Questions"
                       >
@@ -227,7 +250,7 @@ const ExamManagement: React.FC = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold truncate">{exam.title}</h4>
-                    <p className="text-xs opacity-60">{exam.total_marks} marks · Pass: {exam.passing_percentage || 50}%</p>
+                    <p className="text-xs opacity-60">{exam.total_marks} marks · Pass: {exam.passing_marks || Math.floor(exam.total_marks * 0.4)}</p>
                   </div>
                 </div>
 
@@ -260,7 +283,7 @@ const ExamManagement: React.FC = () => {
                   {/* Actions Column */}
                   <div className="col-span-2 flex items-center justify-end gap-2">
                     <button
-                      onClick={() => navigate(`/admin/questions/${exam.id}`)}
+                      onClick={() => onManageQuestions(exam.id)}
                       className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                       title="Manage Questions"
                     >

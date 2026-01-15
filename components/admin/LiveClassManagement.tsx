@@ -44,9 +44,20 @@ const LiveClassManagement: React.FC = () => {
 
     try {
       if (editingClass) {
-        await supabase.from('live_classes').update(formData).eq('id', editingClass.id);
+        // Update live class
+        const { data: updatedClass } = await supabase
+          .from('live_classes')
+          .update(formData)
+          .eq('id', editingClass.id)
+          .select()
+          .single();
       } else {
-        await supabase.from('live_classes').insert([formData]);
+        // Insert new live class
+        await supabase
+          .from('live_classes')
+          .insert([formData])
+          .select()
+          .single();
       }
       fetchData();
       closeModal();
@@ -63,8 +74,16 @@ const LiveClassManagement: React.FC = () => {
 
   const deleteClass = async (id: string) => {
     if (!confirm('Delete?')) return;
-    await supabase.from('live_classes').delete().eq('id', id);
-    fetchData();
+    
+    try {
+      // Delete the live class
+      await supabase.from('live_classes').delete().eq('id', id);
+
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting class:', error);
+      alert('Failed to delete class');
+    }
   };
 
   const openModal = (lc?: LiveClass) => {
@@ -164,7 +183,7 @@ const LiveClassManagement: React.FC = () => {
                           status === 'upcoming' ? 'bg-green-500 text-white' :
                           'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                         }`}>
-                          {status === 'live' ? '🔴 Live' : status === 'upcoming' ? 'Upcoming' : 'Completed'}
+                          {status === 'live' ? 'Live' : status === 'upcoming' ? 'Upcoming' : 'Completed'}
                         </span>
                       </div>
                       <div className="flex gap-1.5 flex-shrink-0">
@@ -260,6 +279,21 @@ const LiveClassManagement: React.FC = () => {
 
                     {/* Actions Column */}
                     <div className="col-span-2 flex items-center justify-end gap-2">
+                      {(status === 'upcoming' || status === 'live') && (
+                        <a
+                          href={lc.meeting_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`p-2 rounded-lg transition-colors ${
+                            status === 'live' 
+                              ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+                              : 'bg-blue-500 hover:bg-blue-600 text-white'
+                          }`}
+                          title="Join Meeting"
+                        >
+                          <span className="material-symbols-outlined text-lg">open_in_new</span>
+                        </a>
+                      )}
                       <button
                         onClick={() => openModal(lc)}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"

@@ -12,6 +12,8 @@ const BatchManagement: React.FC = () => {
     name: '',
     start_date: '',
     end_date: '',
+    description: '',
+    status: 'active' as 'active' | 'inactive',
   });
 
   useEffect(() => {
@@ -109,6 +111,8 @@ const BatchManagement: React.FC = () => {
         name: batch.name,
         start_date: batch.start_date.split('T')[0],
         end_date: batch.end_date.split('T')[0],
+        description: batch.description || '',
+        status: batch.status as 'active' | 'inactive',
       });
     } else {
       setEditingBatch(null);
@@ -118,6 +122,8 @@ const BatchManagement: React.FC = () => {
         name: '',
         start_date: today.toISOString().split('T')[0],
         end_date: endDate.toISOString().split('T')[0],
+        description: '',
+        status: 'active',
       });
     }
     setShowModal(true);
@@ -126,7 +132,7 @@ const BatchManagement: React.FC = () => {
   const closeModal = () => {
     setShowModal(false);
     setEditingBatch(null);
-    setFormData({ name: '', start_date: '', end_date: '' });
+    setFormData({ name: '', start_date: '', end_date: '', description: '', status: 'active' });
   };
 
   if (loading) {

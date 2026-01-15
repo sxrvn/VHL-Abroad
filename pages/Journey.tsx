@@ -38,7 +38,7 @@ const Journey: React.FC = () => {
             <div className="relative glass p-8 rounded-3xl shadow-2xl space-y-6">
               <div 
                 className="aspect-video w-full rounded-2xl overflow-hidden bg-gray-200" 
-                style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&q=80&w=800")', backgroundSize: 'cover', backgroundPosition: 'center' }}
+                style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=1200&h=800&q=90&fm=webp")', backgroundSize: 'cover', backgroundPosition: 'center' }}
               ></div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-white/50 dark:bg-white/5 border border-white/40">
@@ -111,11 +111,11 @@ const Journey: React.FC = () => {
           <div className="lg:w-1/2 grid grid-cols-2 gap-4">
             <div 
               className="rounded-3xl overflow-hidden aspect-[4/5] bg-gray-300" 
-              style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=400")', backgroundSize: 'cover' }}
+              style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=400&h=300&q=90&fm=webp")', backgroundSize: 'cover' }}
             ></div>
             <div 
               className="rounded-3xl overflow-hidden aspect-[4/5] bg-gray-300 mt-12" 
-              style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=400")', backgroundSize: 'cover' }}
+              style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&h=300&q=90&fm=webp")', backgroundSize: 'cover' }}
             ></div>
           </div>
         </div>
@@ -159,8 +159,8 @@ const Journey: React.FC = () => {
             {TESTIMONIALS.map((t) => (
               <div key={t.id} className="min-w-[350px] md:min-w-[400px] bg-white dark:bg-white/5 p-8 rounded-3xl snap-center shadow-xl border border-charcoal/5">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="size-14 rounded-full bg-gray-200 overflow-hidden">
-                    <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                  <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-primary text-3xl">person</span>
                   </div>
                   <div>
                     <h5 className="font-bold">{t.name}</h5>

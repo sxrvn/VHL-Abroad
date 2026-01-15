@@ -31,16 +31,21 @@ const StudentManagement: React.FC = () => {
       const [studentsRes, batchesRes, batchStudentsRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('role', 'student').order('created_at', { ascending: false }),
         supabase.from('batches').select('*').order('name'),
-        supabase.from('batch_students').select(`
-          *,
-          batch:batches(*),
-          student:profiles(*)
-        `),
+        supabase.from('batch_students').select('*'),
       ]);
 
       if (studentsRes.data) setStudents(studentsRes.data);
       if (batchesRes.data) setBatches(batchesRes.data);
-      if (batchStudentsRes.data) setBatchStudents(batchStudentsRes.data);
+      
+      // Manually join batch data
+      if (batchStudentsRes.data && batchesRes.data) {
+        const enrichedBatchStudents = batchStudentsRes.data.map(bs => ({
+          ...bs,
+          batch: batchesRes.data.find(b => b.id === bs.batch_id),
+          student: studentsRes.data?.find(s => s.id === bs.student_id)
+        }));
+        setBatchStudents(enrichedBatchStudents);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {

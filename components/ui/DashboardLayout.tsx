@@ -46,12 +46,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, sidebar, br
       {/* Layout Container */}
       <div className="flex min-h-screen">
         {/* Sidebar - Pass mobile state and desktop collapse state */}
-        {React.cloneElement(sidebar as React.ReactElement, { 
+        {React.isValidElement(sidebar) && React.cloneElement(sidebar, { 
           isMobileOpen, 
           setIsMobileOpen,
           isDesktopCollapsed,
           setIsDesktopCollapsed
-        })}
+        } as any)}
 
         {/* Main Content Area - Dynamic margin based on sidebar state */}
         <main className={`flex-1 w-full pt-14 lg:pt-0 overflow-x-hidden transition-all duration-300 ${

@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Exam, ExamAttempt } from '../../types';
-import { useNavigate } from 'react-router-dom';
 import { isBatchExpired, formatDuration } from '../../lib/utils';
 import { Card, Badge, Button, EmptyState, LoadingSpinner } from '../ui';
 
-const ExamsList: React.FC = () => {
+interface ExamsListProps {
+  onExamStart?: (examId: string) => void;
+}
+
+const ExamsList: React.FC<ExamsListProps> = ({ onExamStart }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [exams, setExams] = useState<Exam[]>([]);
@@ -54,9 +58,10 @@ const ExamsList: React.FC = () => {
   const handleExamAction = (exam: Exam) => {
     const attempt = attempts.find((a) => a.exam_id === exam.id);
     if (attempt?.is_submitted) {
-      // View result - handled in Results tab
+      // Already completed - do nothing or show message
       return;
     }
+    // Navigate to separate exam page
     navigate(`/exam/${exam.id}`);
   };
 

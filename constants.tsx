@@ -11,18 +11,16 @@ export const NAV_ITEMS: NavItem[] = [
 export const TESTIMONIALS: Testimonial[] = [
   {
     id: 1,
-    name: 'Rahul Sharma',
+    name: 'Dev Sharma',
     role: 'MS in Data Science, TU Berlin',
     comment: 'VHL handled everything from my language classes to my apartment in Berlin. Their presence in Germany is a game-changer for new students.',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200&h=200',
     rating: 5
   },
   {
     id: 2,
-    name: 'Ananya Patel',
+    name: 'Ananya Patil',
     role: 'MBA, Munich Business School',
     comment: 'I was worried about the visa process, but the team at VHL prepared me so well. I got my visa in just 3 weeks without any stress.',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200',
     rating: 5
   },
   {
@@ -30,7 +28,6 @@ export const TESTIMONIALS: Testimonial[] = [
     name: 'Vikram Singh',
     role: 'Mechanical Engineer, Stuttgart',
     comment: "They don't just send you to study; they help you build a career. I'm now working at a top automotive firm thanks to their guidance.",
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200&h=200',
     rating: 5
   }
 ];
@@ -43,7 +40,7 @@ export const SERVICES: Service[] = [
     icon: 'verified_user',
     badge: 'Fast-Track: 2-4 Weeks',
     highlights: ['Document authenticity check', 'Application filing assistance', 'Embassy coordination'],
-    image: 'https://images.unsplash.com/photo-1589330694653-ded6df03f754?auto=format&fit=crop&q=80&w=800'
+    image: 'https://images.unsplash.com/photo-1589330694653-ded6df03f754?auto=format&fit=crop&w=600&h=400&q=90&fm=webp'
   },
   {
     id: 'blocked-account',
@@ -52,7 +49,7 @@ export const SERVICES: Service[] = [
     icon: 'account_balance',
     badge: 'Partnered with Top Providers',
     highlights: ['Provider comparison guide', '0% commission fees', 'Instant confirmation support'],
-    image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80&w=800'
+    image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&h=400&q=90&fm=webp'
   },
   {
     id: 'sop-cv',
@@ -61,6 +58,6 @@ export const SERVICES: Service[] = [
     icon: 'description',
     badge: 'Custom-written content',
     highlights: ['Expert storytelling', 'University-specific focus', 'Plagiarism-free guarantee'],
-    image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=800'
+    image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=600&h=400&q=90&fm=webp'
   }
 ];

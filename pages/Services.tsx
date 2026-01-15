@@ -10,9 +10,12 @@ const Services: React.FC = () => {
       <section className="flex flex-col gap-8 lg:flex-row items-center mb-24">
         <div className="w-full lg:w-1/2 aspect-video bg-gray-200 rounded-xl overflow-hidden shadow-lg order-2 lg:order-1">
 <img
-  src="https://images.unsplash.com/photo-KNbKaygXUCE?auto=format&fit=crop&q=80&w=800"
+  src="https://images.unsplash.com/photo-1613244470201-ed366227a371?auto=format&fit=crop&w=1200&h=675&q=90&fm=webp"
+  srcSet="https://images.unsplash.com/photo-1613244470201-ed366227a371?auto=format&fit=crop&w=800&h=450&q=90&fm=webp 800w, https://images.unsplash.com/photo-1613244470201-ed366227a371?auto=format&fit=crop&w=1200&h=675&q=90&fm=webp 1200w"
+  sizes="(max-width: 768px) 100vw, 50vw"
   alt="Books on white textile representing education and learning"
   className="w-full h-full object-cover"
+  fetchPriority="high"
 />
 
         </div>
@@ -57,7 +60,7 @@ const Services: React.FC = () => {
           {SERVICES.map((service) => (
             <div key={service.id} className="group relative overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-charcoal/5 shadow-md hover:shadow-2xl transition-all duration-300">
               <div className="aspect-[4/3] w-full overflow-hidden bg-gray-200">
-                <img src={service.image} alt={service.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <img src={service.image} alt={service.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" width="600" height="400" />
               </div>
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">

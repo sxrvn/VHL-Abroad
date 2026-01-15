@@ -1,13 +1,17 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
-import { Exam, Question, ExamAttempt } from '../types';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
+import { Exam, Question, ExamAttempt } from '../../types';
+import { LoadingSpinner } from '../ui';
 
-const ExamAttemptPage: React.FC = () => {
-  const { examId } = useParams<{ examId: string }>();
+interface ExamTakingProps {
+  examId: string;
+  onComplete: (score: number, totalMarks: number, percentage: number) => void;
+  onBack: () => void;
+}
+
+const ExamTaking: React.FC<ExamTakingProps> = ({ examId, onComplete, onBack }) => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [exam, setExam] = useState<Exam | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null);
@@ -23,28 +27,33 @@ const ExamAttemptPage: React.FC = () => {
   useEffect(() => {
     if (examId && user) initExam();
     
-    return () => {
-      if (autoSaveInterval.current) clearInterval(autoSaveInterval.current);
-      if (timerInterval.current) clearInterval(timerInterval.current);
-    };
-  }, [examId, user]);
-
-  // Prevent browser reload/close/navigation during exam
-  useEffect(() => {
+    // Prevent browser back/refresh/close during exam and auto-submit
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (!submitting && attempt && !attempt.is_submitted) {
         e.preventDefault();
         e.returnValue = 'Your exam is in progress. Are you sure you want to leave?';
-        return 'Your exam is in progress. Are you sure you want to leave?';
+        // Auto-submit exam when tab is closing
+        autoSubmit();
+      }
+    };
+    
+    // Auto-submit when user navigates away or closes page
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && !submitting && attempt && !attempt.is_submitted) {
+        autoSubmit();
       }
     };
     
     window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
+      if (autoSaveInterval.current) clearInterval(autoSaveInterval.current);
+      if (timerInterval.current) clearInterval(timerInterval.current);
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [attempt, submitting]);
+  }, [examId, user, submitting, attempt]);
 
   const initExam = async () => {
     try {
@@ -56,7 +65,7 @@ const ExamAttemptPage: React.FC = () => {
 
       if (!examRes.data) {
         alert('Exam not found');
-        navigate('/dashboard');
+        onBack();
         return;
       }
 
@@ -66,7 +75,7 @@ const ExamAttemptPage: React.FC = () => {
       if (attemptRes.data) {
         if (attemptRes.data.is_submitted) {
           alert('You have already submitted this exam');
-          navigate('/dashboard');
+          onBack();
           return;
         }
         setAttempt(attemptRes.data);
@@ -85,49 +94,32 @@ const ExamAttemptPage: React.FC = () => {
       }
 
       setLoading(false);
+      startAutoSave();
+      startTimer();
     } catch (error) {
       console.error('Error:', error);
       alert('Failed to load exam');
-      navigate('/dashboard');
+      onBack();
     }
   };
 
-  // Start timer when exam is loaded
-  useEffect(() => {
-    if (!loading && timeLeft > 0 && !submitting) {
-      timerInterval.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerInterval.current!);
-            autoSubmit();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => {
-        if (timerInterval.current) {
-          clearInterval(timerInterval.current);
+  const startTimer = () => {
+    timerInterval.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          autoSubmit();
+          return 0;
         }
-      };
-    }
-  }, [loading, submitting]);
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
-  // Start auto-save when attempt is ready
-  useEffect(() => {
-    if (!loading && attempt && !submitting) {
-      autoSaveInterval.current = setInterval(() => {
-        saveAnswers();
-      }, 2000);
-
-      return () => {
-        if (autoSaveInterval.current) {
-          clearInterval(autoSaveInterval.current);
-        }
-      };
-    }
-  }, [loading, attempt, submitting]);
+  const startAutoSave = () => {
+    autoSaveInterval.current = setInterval(() => {
+      saveAnswers();
+    }, 2000);
+  };
 
   const saveAnswers = useCallback(async () => {
     if (!attempt || submitting) return;
@@ -176,8 +168,7 @@ const ExamAttemptPage: React.FC = () => {
       if (autoSaveInterval.current) clearInterval(autoSaveInterval.current);
       if (timerInterval.current) clearInterval(timerInterval.current);
 
-      alert(`Exam submitted! Score: ${score}/${totalMarks} (${percentage.toFixed(1)}%)`);
-      navigate('/dashboard');
+      onComplete(score, totalMarks, percentage);
     } catch (error) {
       console.error('Submit error:', error);
       alert('Failed to submit exam');
@@ -217,15 +208,24 @@ const ExamAttemptPage: React.FC = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><span className="material-symbols-outlined animate-spin text-6xl text-primary">progress_activity</span></div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-bg-light dark:bg-bg-dark pb-20">
+    <div className="min-h-screen pb-20">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-40 bg-white dark:bg-bg-dark border-b border-charcoal/10 dark:border-white/10 shadow-sm">
-        <div className="px-4 sm:px-6 py-3 sm:py-4">
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
-            <h1 className="text-base sm:text-xl font-bold truncate flex-1">{exam?.title}</h1>
+      <div className="sticky top-0 z-40 bg-white dark:bg-bg-dark border-b border-charcoal/10 dark:border-white/10 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+        <div className="py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <button
+                onClick={onBack}
+                className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                title="Back to exams"
+              >
+                <span className="material-symbols-outlined">arrow_back</span>
+              </button>
+              <h1 className="text-base sm:text-xl font-bold truncate">{exam?.title}</h1>
+            </div>
             <div className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-bold text-sm sm:text-base whitespace-nowrap ${timeLeft < 300 ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 'bg-primary/10 text-primary'}`}>
               <span className="material-symbols-outlined text-lg sm:text-xl">schedule</span>
               {formatTime(timeLeft)}
@@ -234,7 +234,7 @@ const ExamAttemptPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="py-6 sm:py-8">
         <div className="space-y-4 sm:space-y-6">
           {questions.map((q, idx) => (
             <div key={q.id} className="bg-white dark:bg-white/5 rounded-xl border border-charcoal/10 dark:border-white/10 p-4 sm:p-6">
@@ -277,11 +277,8 @@ const ExamAttemptPage: React.FC = () => {
                       name={`question-${q.id}`}
                       value={opt}
                       checked={answers[q.id] === opt}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        handleAnswerChange(q.id, opt);
-                      }}
-                      className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0 cursor-pointer accent-primary"
+                      onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                      className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0 accent-primary cursor-pointer"
                     />
                     <span className="flex-1 text-sm sm:text-base leading-relaxed">
                       <strong>{opt}.</strong> {q[`option_${opt.toLowerCase()}` as keyof Question]}
@@ -365,7 +362,7 @@ const ExamAttemptPage: React.FC = () => {
                   <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
                     <p className="text-sm font-semibold text-red-800 dark:text-red-400 mb-2">Unanswered questions:</p>
                     <div className="flex flex-wrap gap-2">
-                      {questions.filter(q => !answers[q.id]).map((q, idx) => {
+                      {questions.filter(q => !answers[q.id]).map((q) => {
                         const qIndex = questions.findIndex(quest => quest.id === q.id);
                         return (
                           <span key={q.id} className="px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-400 rounded text-sm">
@@ -413,4 +410,4 @@ const ExamAttemptPage: React.FC = () => {
   );
 };
 
-export default ExamAttemptPage;
+export default ExamTaking;

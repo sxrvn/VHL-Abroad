@@ -71,7 +71,7 @@ const Language: React.FC = () => {
             <div className="flex -space-x-3">
               {[1, 2, 3].map(i => (
                 <div key={i} className="size-10 rounded-full border-2 border-white dark:border-bg-dark bg-gray-500 overflow-hidden">
-                  <img src={`https://picsum.photos/seed/${i*10}/40/40`} alt="student" />
+                  <img src={`https://picsum.photos/seed/${i*10}/80/80.webp`} alt="student" width="40" height="40" />
                 </div>
               ))}
             </div>
@@ -80,7 +80,7 @@ const Language: React.FC = () => {
         </div>
         <div className="relative">
           <div className="w-full aspect-square rounded-3xl bg-gray-200 overflow-hidden shadow-2xl">
-            <img src="https://images.unsplash.com/photo-1543269664-76bc3997d9ea?auto=format&fit=crop&q=80&w=800" alt="Classroom" className="w-full h-full object-cover" />
+            <img src="https://images.unsplash.com/photo-1543269664-76bc3997d9ea?auto=format&fit=crop&w=800&h=500&q=90&fm=webp" alt="Classroom" className="w-full h-full object-cover" fetchPriority="high" />
           </div>
           <div className="absolute -bottom-6 -left-6 bg-white dark:bg-bg-dark p-6 rounded-2xl shadow-xl border border-charcoal/5 hidden md:block">
             <div className="flex items-center gap-4">

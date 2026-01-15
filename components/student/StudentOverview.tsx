@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { BatchStudent } from '../../types';
+import { BatchStudent, Result } from '../../types';
 import { formatDate, isBatchExpired, getDaysRemaining } from '../../lib/utils';
 import { Card, StatCard, Badge, EmptyState, LoadingSpinner } from '../ui';
 
@@ -20,6 +20,7 @@ const StudentOverview: React.FC = () => {
   const [batchEnrollment, setBatchEnrollment] = useState<BatchStudent | null>(null);
   const [stats, setStats] = useState({ videos: 0, liveClasses: 0, exams: 0, completed: 0 });
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [examResults, setExamResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,22 +40,24 @@ const StudentOverview: React.FC = () => {
       if (enrollment) {
         setBatchEnrollment(enrollment);
         
-        const [videosRes, classesRes, examsRes, attemptsRes, notificationsRes] = await Promise.all([
-          supabase.from('videos').select('id', { count: 'exact', head: true }).eq('batch_id', enrollment.batch_id).eq('is_published', true),
+        const [materialsRes, classesRes, examsRes, attemptsRes, notificationsRes, resultsRes] = await Promise.all([
+          supabase.from('materials').select('id', { count: 'exact', head: true }).eq('batch_id', enrollment.batch_id).eq('is_published', true),
           supabase.from('live_classes').select('id', { count: 'exact', head: true }).eq('batch_id', enrollment.batch_id).eq('is_active', true),
           supabase.from('exams').select('id', { count: 'exact', head: true }).eq('batch_id', enrollment.batch_id).eq('is_published', true),
           supabase.from('exam_attempts').select('id', { count: 'exact', head: true }).eq('student_id', user?.id).eq('is_submitted', true),
-          supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(5)
+          supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(5),
+          supabase.from('results').select('*, exam:exams(title)').eq('student_id', user?.id).order('created_at', { ascending: false }).limit(5)
         ]);
 
         setStats({
-          videos: videosRes.count || 0,
+          videos: materialsRes.count || 0,
           liveClasses: classesRes.count || 0,
           exams: examsRes.count || 0,
           completed: attemptsRes.count || 0,
         });
         
         setNotifications(notificationsRes.data || []);
+        setExamResults(resultsRes.data || []);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -62,6 +65,8 @@ const StudentOverview: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Watch time tracking removed per project scope
 
   if (loading) return <LoadingSpinner />;
 

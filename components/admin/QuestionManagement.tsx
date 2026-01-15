@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Question } from '../../types';
-import { useParams, useNavigate } from 'react-router-dom';
 
-const QuestionManagement: React.FC = () => {
-  const { examId } = useParams<{ examId: string }>();
-  const navigate = useNavigate();
+interface QuestionManagementProps {
+  examId: string;
+  onBack: () => void;
+}
+
+const QuestionManagement: React.FC<QuestionManagementProps> = ({ examId, onBack }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [examTitle, setExamTitle] = useState('');
   const [loading, setLoading] = useState(true);
@@ -118,26 +120,29 @@ const QuestionManagement: React.FC = () => {
   if (loading) return <div className="flex items-center justify-center py-20"><span className="material-symbols-outlined animate-spin text-4xl text-primary">progress_activity</span></div>;
 
   return (
-    <div className="min-h-screen bg-bg-light dark:bg-bg-dark p-6">
-      <div className="max-w-4xl mx-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <button onClick={() => navigate('/admin')} className="size-12 rounded-xl bg-white dark:bg-white/5 hover:bg-gradient-to-br hover:from-primary/10 hover:to-purple-500/10 flex items-center justify-center transition-all hover:scale-105">
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-          <button onClick={() => openModal()} className="flex items-center gap-2 bg-gradient-to-r from-primary to-purple-500 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/10 hover:scale-[1.02] transition-all">
-            <span className="material-symbols-outlined">add</span>Add Question
-          </button>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <button onClick={onBack} className="size-12 rounded-xl bg-white dark:bg-white/5 hover:bg-gradient-to-br hover:from-primary/10 hover:to-purple-500/10 flex items-center justify-center transition-all hover:scale-105">
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div className="flex-1 mx-4">
+          <h2 className="text-xl font-bold">{examTitle}</h2>
+          <p className="text-sm opacity-60">Manage exam questions</p>
         </div>
+        <button onClick={() => openModal()} className="flex items-center gap-2 bg-gradient-to-r from-primary to-purple-500 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/10 hover:scale-[1.02] transition-all">
+          <span className="material-symbols-outlined">add</span>Add Question
+        </button>
+      </div>
 
-        {questions.length === 0 ? (
-          <div className="text-center py-20 bg-white dark:bg-white/5 rounded-2xl border border-charcoal/10 dark:border-white/10">
-            <div className="size-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-5xl text-purple-500">help</span>
-            </div>
-            <h3 className="text-2xl font-bold mb-2">No questions yet</h3>
+      {questions.length === 0 ? (
+        <div className="text-center py-20 bg-white dark:bg-white/5 rounded-2xl border border-charcoal/10 dark:border-white/10">
+          <div className="size-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center">
+            <span className="material-symbols-outlined text-5xl text-purple-500">help</span>
           </div>
-        ) : (
-          <div className="space-y-4">
+          <h3 className="text-2xl font-bold mb-2">No questions yet</h3>
+        </div>
+      ) : (
+        <div className="space-y-4">
             {questions.map((q, idx) => (
               <div key={q.id} className="bg-white dark:bg-white/5 rounded-2xl border border-charcoal/10 dark:border-white/10 p-6 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-start justify-between">
@@ -184,10 +189,10 @@ const QuestionManagement: React.FC = () => {
                 </div>
               </div>
             ))}
-          </div>
-        )}
+        </div>
+      )}
 
-        {showModal && (
+      {showModal && (
           <>
             <div className="fixed inset-0 bg-black/50 z-40" onClick={closeModal} />
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -228,9 +233,8 @@ const QuestionManagement: React.FC = () => {
                 </form>
               </div>
             </div>
-          </>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 };

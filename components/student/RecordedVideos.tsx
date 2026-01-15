@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Video } from '../../types';
@@ -9,10 +9,60 @@ const RecordedVideos: React.FC = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [batchExpired, setBatchExpired] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [watchingVideo, setWatchingVideo] = useState<Video | null>(null);
+  const videoRef = useRef<HTMLIFrameElement>(null);
+  const watchTimeInterval = useRef<NodeJS.Timeout | null>(null);
+  const startTime = useRef<number>(Date.now());
 
   useEffect(() => {
     if (user) fetchData();
   }, [user]);
+
+  useEffect(() => {
+    // Track progress when watching video
+    if (watchingVideo) {
+      startTime.current = Date.now();
+      startProgressTracking();
+    }
+
+    return () => {
+      if (watchTimeInterval.current) {
+        clearInterval(watchTimeInterval.current);
+      }
+      if (watchingVideo) {
+        const watchTime = Math.floor((Date.now() - startTime.current) / 1000);
+        saveProgress(watchingVideo.id, 100, watchTime);
+      }
+    };
+  }, [watchingVideo]);
+
+  const startProgressTracking = () => {
+    watchTimeInterval.current = setInterval(() => {
+      if (watchingVideo) {
+        const watchTime = Math.floor((Date.now() - startTime.current) / 1000);
+        updateProgress(watchingVideo.id, 75, watchTime);
+      }
+    }, 30000);
+  };
+
+  const updateProgress = async (videoId: string, percentage: number, watchTime: number) => {
+    try {
+      await supabase.from('learning_progress').upsert({
+        student_id: user?.id,
+        video_id: videoId,
+        watch_percentage: percentage,
+        completed: percentage >= 90,
+        last_watched_at: new Date().toISOString(),
+        total_watch_time: watchTime
+      });
+    } catch (error) {
+      console.error('Error updating progress:', error);
+    }
+  };
+
+  const saveProgress = async (videoId: string, percentage: number, watchTime: number) => {
+    await updateProgress(videoId, percentage, watchTime);
+  };
 
   const fetchData = async () => {
     try {

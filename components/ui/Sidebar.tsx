@@ -7,6 +7,7 @@ interface SidebarItem {
   icon: string;
   path?: string;
   onClick?: () => void;
+  badge?: number;
 }
 
 interface SidebarProps {
@@ -53,45 +54,69 @@ const Sidebar: React.FC<SidebarProps> = ({
     <>
       {/* Brand */}
       <div className="p-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="bg-white rounded-xl p-2 size-11 flex-shrink-0 shadow-lg shadow-primary/10 transition-transform hover:scale-105">
-            <img src="/assets/red-logo.png" alt="VHL Logo" className="w-full h-full object-contain" />
+        <Link to="/" className="flex items-center gap-3">
+          <div className="bg-white rounded-xl p-2 size-11 flex-shrink-0 shadow-lg shadow-primary/10">
+            <img src="/assets/red-logo.png" alt="VHL Logo" className="w-full h-full object-contain" width="150" height="50" />
           </div>
           {!isDesktopCollapsed && (
             <h1 className="text-lg font-black tracking-tight whitespace-nowrap text-white">
               {brandText} <span className="text-primary">LEARN</span>
             </h1>
           )}
-        </div>
+        </Link>
       </div>
 
       {/* Navigation Items */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-2">
         {items.map((item) => {
           const active = isActive(item);
-          const ItemWrapper = item.path ? Link : 'button';
-          const itemProps = item.path 
-            ? { to: item.path, onClick: () => setIsMobileOpen(false) } 
-            : { onClick: () => handleItemClick(item), type: 'button' as const };
+          
+          const sharedClassName = `group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 w-full text-left relative overflow-hidden ${
+            active
+              ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-lg shadow-primary/10'
+              : 'text-gray-300 hover:bg-white/10 hover:text-white hover:shadow-md hover:scale-[1.02]'
+          }`;
 
-          return (
-            <ItemWrapper
+          return item.path ? (
+            <Link
               key={item.id}
-              {...itemProps}
-              className={`group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 w-full text-left relative overflow-hidden ${
-                active
-                  ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-lg shadow-primary/10'
-                  : 'text-gray-300 hover:bg-white/10 hover:text-white hover:shadow-md hover:scale-[1.02]'
-              }`}
+              to={item.path}
+              onClick={() => setIsMobileOpen(false)}
+              className={sharedClassName}
             >
               <span className={`material-symbols-outlined text-xl flex-shrink-0 transition-transform ${active ? '' : 'group-hover:scale-110'}`}>{item.icon}</span>
               {!isDesktopCollapsed && (
                 <span className="font-semibold text-sm whitespace-nowrap">{item.label}</span>
               )}
-              {active && !isDesktopCollapsed && (
+              {item.badge && item.badge > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow-lg animate-pulse">
+                  {item.badge > 99 ? '99+' : item.badge}
+                </span>
+              )}
+              {active && !isDesktopCollapsed && !item.badge && (
                 <div className="absolute right-2 size-2 rounded-full bg-white animate-pulse" />
               )}
-            </ItemWrapper>
+            </Link>
+          ) : (
+            <button
+              key={item.id}
+              onClick={() => handleItemClick(item)}
+              type="button"
+              className={sharedClassName}
+            >
+              <span className={`material-symbols-outlined text-xl flex-shrink-0 transition-transform ${active ? '' : 'group-hover:scale-110'}`}>{item.icon}</span>
+              {!isDesktopCollapsed && (
+                <span className="font-semibold text-sm whitespace-nowrap">{item.label}</span>
+              )}
+              {item.badge && item.badge > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow-lg animate-pulse">
+                  {item.badge > 99 ? '99+' : item.badge}
+                </span>
+              )}
+              {active && !isDesktopCollapsed && !item.badge && (
+                <div className="absolute right-2 size-2 rounded-full bg-white animate-pulse" />
+              )}
+            </button>
           );
         })}
       </nav>

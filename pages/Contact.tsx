@@ -108,9 +108,9 @@ const Contact: React.FC = () => {
           <h3 className="text-xl font-bold">Get in Touch</h3>
           <div className="space-y-4">
             {[
-              { icon: 'phone', title: 'Call Now', val: '+91 9172704933', color: 'primary' },
-              { icon: 'chat_bubble', title: 'WhatsApp Support', val: '+91 9552375281', color: 'green-500' },
-              { icon: 'mail', title: 'Email Us', val: 'info@vhlabroadcareer.com', color: 'blue-500' }
+              { icon: 'phone', title: 'Call Now', val: '+49 30 8765 4321', color: 'primary' },
+              { icon: 'chat_bubble', title: 'WhatsApp Support', val: '+49 176 2849 5137', color: 'green-500' },
+              { icon: 'mail', title: 'Email Us', val: 'info@germangateway.de', color: 'blue-500' }
             ].map((card, i) => (
               <div key={i} className="flex gap-4 rounded-xl border border-charcoal/10 dark:border-white/10 bg-white dark:bg-white/5 p-5 items-start hover:shadow-md transition-shadow">
                 <div className={`p-3 rounded-lg bg-${card.color === 'primary' ? 'primary' : card.color}/10 text-${card.color === 'primary' ? 'primary' : card.color}`}>
@@ -126,7 +126,8 @@ const Contact: React.FC = () => {
 
           <div className="rounded-2xl overflow-hidden h-72 w-full relative group bg-gray-200 shadow-lg">
             <img 
-              src="https://lh3.googleusercontent.com/xksn1Iu9zVbDuxlagioZDCUQ0rTD7BbZAwRQ3DHlNzJc1d0rZ65srfsCW5V_EJeokuMzAUgjbIREO1r1tdVrPlDCKPCQVABssA=w3840-h2160-c-rw-v3" 
+              src="https://lh3.googleusercontent.com/xksn1Iu9zVbDuxlagioZDCUQ0rTD7BbZAwRQ3DHlNzJc1d0rZ65srfsCW5V_EJeokuMzAUgjbIREO1r1tdVrPlDCKPCQVABssA=w1200-h675-c-rw-v3-e30"
+              fetchPriority="low" 
               className="w-full h-full object-cover" 
               alt="Berlin Brandenburg Gate" 
             />

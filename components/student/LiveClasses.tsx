@@ -90,7 +90,7 @@ const LiveClasses: React.FC = () => {
                           size="sm"
                           className={status === 'live' ? 'animate-pulse shadow-lg shadow-red-500/30' : ''}
                         >
-                          {status === 'live' ? '🔴 LIVE NOW' : status.toUpperCase()}
+                          {status === 'live' ? 'LIVE NOW' : status.toUpperCase()}
                         </Badge>
                       </div>
                     </div>
@@ -109,21 +109,15 @@ const LiveClasses: React.FC = () => {
                     </div>
                   </div>
                   {(status === 'upcoming' || status === 'live') && (
-                    <a
-                      href={lc.meeting_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Button
+                      onClick={() => window.open(lc.meeting_link, '_blank')}
+                      variant={status === 'live' ? 'danger' : 'primary'}
+                      icon="open_in_new"
+                      size="lg"
                       className="w-full sm:w-auto"
                     >
-                      <Button
-                        variant={status === 'live' ? 'danger' : 'primary'}
-                        icon="video_call"
-                        size="lg"
-                        className="w-full sm:w-auto"
-                      >
-                        {status === 'live' ? 'Join Now' : 'Join Class'}
-                      </Button>
-                    </a>
+                      {status === 'live' ? 'Join Now' : 'Join Class'}
+                    </Button>
                   )}
                 </div>
               </Card>

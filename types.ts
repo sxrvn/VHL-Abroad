@@ -9,7 +9,6 @@ export interface Testimonial {
   name: string;
   role: string;
   comment: string;
-  image: string;
   rating: number;
 }
 
@@ -45,6 +44,7 @@ export interface Profile {
 export interface Batch {
   id: string;
   name: string;
+  description?: string;
   start_date: string;
   end_date: string;
   status: 'active' | 'inactive';
@@ -75,6 +75,40 @@ export interface Video {
   batch?: Batch;
 }
 
+// New Material interface for the file upload system
+export interface Material {
+  id: string;
+  batch_id: string;
+  title: string;
+  description?: string;
+  material_type: 'video' | 'pdf' | 'audio' | 'document' | 'image';
+  storage_provider: 'youtube' | 'google_drive';
+  external_url: string;
+  file_size_mb?: number;
+  duration_minutes?: number;
+  thumbnail_url?: string;
+  view_count: number;
+  download_count: number;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  is_published: boolean;
+  order_index: number;
+  batch?: Batch;
+}
+
+export interface MaterialProgress {
+  id: string;
+  student_id: string;
+  material_id: string;
+  watch_percentage: number;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+  material?: Material;
+}
+
+
 export interface LiveClass {
   id: string;
   batch_id: string;
@@ -96,6 +130,7 @@ export interface Exam {
   description?: string;
   duration_minutes: number;
   total_marks: number;
+  passing_marks?: number;
   is_published: boolean;
   publish_result: boolean;
   created_at: string;
@@ -142,4 +177,23 @@ export interface Result {
   created_at: string;
   exam?: Exam;
   student?: Profile;
+}
+
+export interface LearningProgress {
+  id: string;
+  student_id: string;
+  video_id: string;
+  watch_percentage: number;
+  completed: boolean;
+  last_watched_at?: string;
+  created_at: string;
+  updated_at: string;
+  video?: Video;
+}
+
+export interface ProgressSummary {
+  totalVideos: number;
+  completedVideos: number;
+  averageCompletion: number;
+  lastActivity?: string;
 }
