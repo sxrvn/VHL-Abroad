@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -27,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
@@ -78,10 +80,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           fetchProfile(session.user.id).then(() => {
             // Small delay to let profile state update
             setTimeout(() => {
-              const currentPath = window.location.hash;
-              // Only redirect if on login page
-              if (currentPath === '#/login') {
-                window.location.hash = '#/dashboard';
+              const currentPath = window.location.pathname;
+              // Redirect if on login page or home page (after verification redirect)
+              if (currentPath === '/login' || currentPath === '/') {
+                navigate('/dashboard');
               }
             }, 100);
           });

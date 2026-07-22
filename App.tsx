@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { NAV_ITEMS } from './constants';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -52,8 +52,8 @@ const Navbar: React.FC = () => {
           {NAV_ITEMS.map((item) => (
             <Link 
               key={item.label} 
-              to={item.path.replace('#', '')} 
-              className={`text-sm font-semibold hover:text-primary transition-colors ${location.pathname === item.path.replace('#', '') ? 'text-primary' : ''}`}
+              to={item.path} 
+              className={`text-sm font-semibold hover:text-primary transition-colors ${location.pathname === item.path ? 'text-primary' : ''}`}
             >
               {item.label}
             </Link>
@@ -137,10 +137,10 @@ const Navbar: React.FC = () => {
                 {NAV_ITEMS.map((item) => (
                   <Link
                     key={item.label}
-                    to={item.path.replace('#', '')}
+                    to={item.path}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-all ${
-                      location.pathname === item.path.replace('#', '') 
+                      location.pathname === item.path
                         ? 'bg-primary/10 text-primary font-bold' 
                         : 'font-semibold'
                     }`}

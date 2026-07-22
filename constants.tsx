@@ -2,10 +2,10 @@
 import { NavItem, Testimonial, Service } from './types';
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Language Training', path: '#/' },
-  { label: 'Your Journey', path: '#/journey' },
-  { label: 'Study in Germany', path: '#/universities' },
-  { label: 'Visa Services', path: '#/services' },
+  { label: 'Language Training', path: '/' },
+  { label: 'Your Journey', path: '/journey' },
+  { label: 'Study in Germany', path: '/universities' },
+  { label: 'Visa Services', path: '/services' },
 ];
 
 export const TESTIMONIALS: Testimonial[] = [

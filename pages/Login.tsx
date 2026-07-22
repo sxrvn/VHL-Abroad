@@ -5,12 +5,22 @@ import { supabase } from '../lib/supabase';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user, profile } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [signupComplete, setSignupComplete] = useState(false);
+
+  React.useEffect(() => {
+    if (user) {
+      if (profile?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [user, profile, navigate]);
   
   const [formData, setFormData] = useState({
     fullName: '',
