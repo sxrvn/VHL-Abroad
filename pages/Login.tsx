@@ -11,16 +11,6 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [signupComplete, setSignupComplete] = useState(false);
-
-  React.useEffect(() => {
-    if (user) {
-      if (profile?.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
-    }
-  }, [user, profile, navigate]);
   
   const [formData, setFormData] = useState({
     fullName: '',

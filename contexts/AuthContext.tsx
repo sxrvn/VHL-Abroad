@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -28,7 +27,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   const fetchProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
@@ -74,18 +72,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         fetchProfile(session.user.id);
         
-        // Auto-redirect only after explicit sign in (not on session restore/reload)
-        if (event === 'SIGNED_IN' && session.user.email_confirmed_at) {
-          // Use profile from state or fetch it
-          fetchProfile(session.user.id).then(() => {
-            // Small delay to let profile state update
-            setTimeout(() => {
-              const currentPath = window.location.pathname;
-              // Redirect if on login page or home page (after verification redirect)
-              if (currentPath === '/login' || currentPath === '/') {
-                navigate('/dashboard');
-              }
-            }, 100);
+        // Redirect to dashboard after sign in (covers both manual login and email verification)
+        if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+          fetchProfile(session.user.id).then((profileData) => {
+            const role = profileData?.role;
+            const hash = window.location.hash;
+            // Don't redirect if already on dashboard or admin
+            const alreadyOnDashboard = hash.startsWith('#/dashboard') || hash.startsWith('#/admin');
+            if (!alreadyOnDashboard) {
+              setTimeout(() => {
+                if (role === 'admin') {
+                  window.location.hash = '#/admin';
+                } else {
+                  window.location.hash = '#/dashboard';
+                }
+              }, 100);
+            }
           });
         }
       } else {
