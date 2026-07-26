@@ -42,7 +42,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
-  // Track if the current sign-in came from an email verification link
+
+  // Ref to track if the current sign-in came from an email verification link
   const isVerificationSignIn = React.useRef(false);
 
   const clearVerificationMessage = () => setVerificationMessage(null);
@@ -72,29 +73,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // --- Handle Supabase email verification tokens in the URL hash ---
-    // When HashRouter is used, Supabase's verification redirect lands as:
-    //   https://yoursite.com/#access_token=...&type=signup
-    // HashRouter would try to route '#access_token=...' as a path.
-    // We intercept it here, exchange the tokens, then clean up the URL.
+    // ─── Detect email verification redirects ────────────────────────────────
+    //
+    // Supabase v2 supports two auth flows:
+    //
+    // 1. PKCE flow (default in v2): Verification link has ?code=xxx in the
+    //    query string → e.g., http://yoursite.com/?code=abc123
+    //    Supabase JS client auto-detects and exchanges the code for a session.
+    //
+    // 2. Implicit flow (legacy): Verification link has #access_token=xxx in
+    //    the hash → e.g., http://yoursite.com/#access_token=xxx&type=signup
+    //    Conflicts with HashRouter so we must intercept and exchange manually.
+    //
+    // ────────────────────────────────────────────────────────────────────────
+
+    // Check for PKCE flow (?code= in query params)
+    const searchParams = new URLSearchParams(window.location.search);
+    const pkceCode = searchParams.get('code');
+
+    // Check for implicit flow (#access_token= in hash)
     const rawHash = window.location.hash;
     const hashParams = parseHashParams(rawHash);
-    const accessToken = hashParams['access_token'];
-    const refreshToken = hashParams['refresh_token'];
-    const tokenType = hashParams['type'];
+    const implicitToken = hashParams['access_token'];
+    const implicitRefresh = hashParams['refresh_token'];
+    const implicitType = hashParams['type'];
+    const isImplicitVerification =
+      !!(implicitToken && implicitRefresh && (implicitType === 'signup' || implicitType === 'email_change'));
 
-    if (accessToken && refreshToken && (tokenType === 'signup' || tokenType === 'email_change' || tokenType === 'recovery')) {
-      // Mark that this sign-in is from an email verification
-      if (tokenType === 'signup' || tokenType === 'email_change') {
-        isVerificationSignIn.current = true;
-      }
-      // Clean up the URL immediately so HashRouter doesn't try to route the token
+    if (pkceCode) {
+      // PKCE flow: supabase-js auto-detects ?code= on client init and exchanges
+      // it for a session. We just need to mark this as a verification sign-in
+      // so we can show the success message when onAuthStateChange fires.
+      isVerificationSignIn.current = true;
+
+      // Clean up the ?code= from the URL so it doesn't persist after the exchange.
+      // Use history.replaceState so we don't add a history entry.
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Keep loading=true — onAuthStateChange will set it to false when session arrives
+
+    } else if (isImplicitVerification) {
+      // Implicit flow: clear the hash tokens so HashRouter doesn't try to
+      // match "access_token=..." as a route path.
+      isVerificationSignIn.current = true;
       window.location.hash = '#/';
-      // Exchange the tokens for a valid session
-      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-      // setLoading stays true until onAuthStateChange fires below
+
+      // Manually exchange the tokens for a valid Supabase session
+      supabase.auth.setSession({
+        access_token: implicitToken,
+        refresh_token: implicitRefresh,
+      });
+
+      // Keep loading=true — onAuthStateChange will set it to false
+
     } else {
-      // Normal startup: get existing session
+      // Normal app load — fetch the existing session from storage
       supabase.auth.getSession().then(({ data: { session } }) => {
         setSession(session);
         setUser(session?.user ?? null);
@@ -105,35 +138,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
 
-    // Listen for auth state changes (handles all sign-in paths)
+    // ─── Listen for all auth state changes ─────────────────────────────────
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        fetchProfile(session.user.id).then((profileData) => {
-          const role = profileData?.role;
-          const currentHash = window.location.hash;
-          const alreadyOnDashboard = currentHash.startsWith('#/dashboard') || currentHash.startsWith('#/admin');
+        const profileData = await fetchProfile(session.user.id);
+        const role = profileData?.role;
+        const currentHash = window.location.hash;
+        const alreadyOnDashboard =
+          currentHash.startsWith('#/dashboard') || currentHash.startsWith('#/admin');
 
-          if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-            if (isVerificationSignIn.current) {
-              // Email verification: show success message and redirect to dashboard
-              isVerificationSignIn.current = false;
-              setVerificationMessage('🎉 Email verified successfully! Welcome to VHL Abroad.');
-              setTimeout(() => {
-                window.location.hash = role === 'admin' ? '#/admin' : '#/dashboard';
-              }, 300);
-            } else if (!alreadyOnDashboard) {
-              // Regular sign-in redirect
-              setTimeout(() => {
-                window.location.hash = role === 'admin' ? '#/admin' : '#/dashboard';
-              }, 100);
-            }
+        if (event === 'SIGNED_IN') {
+          if (isVerificationSignIn.current) {
+            // ✅ Email verification complete — show success banner + redirect
+            isVerificationSignIn.current = false;
+            setVerificationMessage('🎉 Email verified successfully! Welcome to VHL Abroad.');
+            setTimeout(() => {
+              window.location.hash = role === 'admin' ? '#/admin' : '#/dashboard';
+            }, 300);
+          } else if (!alreadyOnDashboard) {
+            // Regular manual sign-in redirect
+            setTimeout(() => {
+              window.location.hash = role === 'admin' ? '#/admin' : '#/dashboard';
+            }, 100);
           }
-        });
+        }
       } else {
         setProfile(null);
       }
@@ -157,6 +190,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       password,
       options: {
+        // Redirect to the current origin so verification works on both
+        // localhost (dev) and the production Netlify URL
+        emailRedirectTo: window.location.origin,
         data: {
           full_name: fullName,
           phone: phone,
