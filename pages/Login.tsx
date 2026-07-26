@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, user, profile } = useAuth();
+  const { signIn, signUp, user, profile, verificationMessage, clearVerificationMessage } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [signupComplete, setSignupComplete] = useState(false);
+  const [resendEmail, setResendEmail] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -18,6 +20,32 @@ const Login: React.FC = () => {
     password: '',
     phone: '',
   });
+
+  // Clear verification message when leaving this page
+  useEffect(() => {
+    return () => {
+      clearVerificationMessage();
+    };
+  }, []);
+
+  const handleResendVerification = async () => {
+    const emailToResend = resendEmail || formData.email;
+    if (!emailToResend) {
+      setError('Please enter your email address first.');
+      return;
+    }
+    setResendLoading(true);
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: emailToResend,
+    });
+    setResendLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      setSuccess('Verification email resent! Please check your inbox.');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +79,7 @@ const Login: React.FC = () => {
         if (error) {
           setError(error.message);
         } else {
+          setResendEmail(formData.email);
           setSignupComplete(true);
         }
       }
@@ -144,7 +173,7 @@ const Login: React.FC = () => {
                     <span className="material-symbols-outlined text-primary mt-0.5">mail</span>
                     <div>
                       <p className="font-bold text-sm">Verification Email Sent</p>
-                      <p className="text-sm opacity-70">We've sent a verification link to <span className="font-semibold">{formData.email}</span></p>
+                      <p className="text-sm opacity-70">We've sent a verification link to <span className="font-semibold">{resendEmail || formData.email}</span></p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -156,7 +185,7 @@ const Login: React.FC = () => {
                 </div>
                 <div className="space-y-4">
                   <button
-                    onClick={() => setIsLogin(true)}
+                    onClick={() => { setIsLogin(true); setSignupComplete(false); }}
                     className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-all shadow-lg"
                   >
                     Go to Sign In
@@ -170,13 +199,43 @@ const Login: React.FC = () => {
                 </div>
                 <p className="text-xs opacity-60 pt-4">
                   Didn't receive the email? Check your spam folder or{' '}
-                  <button className="text-primary font-bold hover:underline">
-                    resend verification
+                  <button
+                    onClick={handleResendVerification}
+                    disabled={resendLoading}
+                    className="text-primary font-bold hover:underline disabled:opacity-50"
+                  >
+                    {resendLoading ? 'Sending...' : 'resend verification'}
                   </button>
                 </p>
+                {success && (
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-2">
+                    <span className="material-symbols-outlined text-green-600 text-base">check_circle</span>
+                    <p className="text-sm text-green-600 dark:text-green-400">{success}</p>
+                  </div>
+                )}
               </div>
             ) : (
               <>
+                {/* Email Verification Success Banner */}
+                {verificationMessage && (
+                  <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl flex items-start gap-4 animate-fadeIn">
+                    <div className="size-10 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-outlined text-green-600 text-xl">verified</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm text-green-700 dark:text-green-400">Email Verified!</p>
+                      <p className="text-sm text-green-600 dark:text-green-400 opacity-90">{verificationMessage}</p>
+                      <p className="text-xs text-green-500 mt-1">Redirecting you to your dashboard...</p>
+                    </div>
+                    <button
+                      onClick={clearVerificationMessage}
+                      className="text-green-500 hover:text-green-700 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-base">close</span>
+                    </button>
+                  </div>
+                )}
+
                 <div className="mb-8">
                   <h3 className="text-3xl font-black mb-2">
                     {isLogin ? 'Welcome Back' : 'Get Started'}

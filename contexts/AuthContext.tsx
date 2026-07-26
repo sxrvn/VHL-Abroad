@@ -2,6 +2,18 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
+// Helper: parse a raw hash string (without leading #) into key-value pairs
+const parseHashParams = (hash: string): Record<string, string> => {
+  return hash
+    .replace(/^#/, '')
+    .split('&')
+    .reduce((acc, pair) => {
+      const [key, value] = pair.split('=');
+      if (key) acc[decodeURIComponent(key)] = decodeURIComponent(value || '');
+      return acc;
+    }, {} as Record<string, string>);
+};
+
 interface UserProfile {
   id: string;
   email: string;
@@ -15,6 +27,8 @@ interface AuthContextType {
   session: Session | null;
   profile: UserProfile | null;
   loading: boolean;
+  verificationMessage: string | null;
+  clearVerificationMessage: () => void;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
@@ -27,6 +41,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
+  // Track if the current sign-in came from an email verification link
+  const isVerificationSignIn = React.useRef(false);
+
+  const clearVerificationMessage = () => setVerificationMessage(null);
 
   const fetchProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
@@ -53,46 +72,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-      setLoading(false);
-    });
+    // --- Handle Supabase email verification tokens in the URL hash ---
+    // When HashRouter is used, Supabase's verification redirect lands as:
+    //   https://yoursite.com/#access_token=...&type=signup
+    // HashRouter would try to route '#access_token=...' as a path.
+    // We intercept it here, exchange the tokens, then clean up the URL.
+    const rawHash = window.location.hash;
+    const hashParams = parseHashParams(rawHash);
+    const accessToken = hashParams['access_token'];
+    const refreshToken = hashParams['refresh_token'];
+    const tokenType = hashParams['type'];
 
-    // Listen for auth changes
+    if (accessToken && refreshToken && (tokenType === 'signup' || tokenType === 'email_change' || tokenType === 'recovery')) {
+      // Mark that this sign-in is from an email verification
+      if (tokenType === 'signup' || tokenType === 'email_change') {
+        isVerificationSignIn.current = true;
+      }
+      // Clean up the URL immediately so HashRouter doesn't try to route the token
+      window.location.hash = '#/';
+      // Exchange the tokens for a valid session
+      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+      // setLoading stays true until onAuthStateChange fires below
+    } else {
+      // Normal startup: get existing session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+        setLoading(false);
+      });
+    }
+
+    // Listen for auth state changes (handles all sign-in paths)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+
       if (session?.user) {
-        fetchProfile(session.user.id);
-        
-        // Redirect to dashboard after sign in (covers both manual login and email verification)
-        if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-          fetchProfile(session.user.id).then((profileData) => {
-            const role = profileData?.role;
-            const hash = window.location.hash;
-            // Don't redirect if already on dashboard or admin
-            const alreadyOnDashboard = hash.startsWith('#/dashboard') || hash.startsWith('#/admin');
-            if (!alreadyOnDashboard) {
+        fetchProfile(session.user.id).then((profileData) => {
+          const role = profileData?.role;
+          const currentHash = window.location.hash;
+          const alreadyOnDashboard = currentHash.startsWith('#/dashboard') || currentHash.startsWith('#/admin');
+
+          if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+            if (isVerificationSignIn.current) {
+              // Email verification: show success message and redirect to dashboard
+              isVerificationSignIn.current = false;
+              setVerificationMessage('🎉 Email verified successfully! Welcome to VHL Abroad.');
               setTimeout(() => {
-                if (role === 'admin') {
-                  window.location.hash = '#/admin';
-                } else {
-                  window.location.hash = '#/dashboard';
-                }
+                window.location.hash = role === 'admin' ? '#/admin' : '#/dashboard';
+              }, 300);
+            } else if (!alreadyOnDashboard) {
+              // Regular sign-in redirect
+              setTimeout(() => {
+                window.location.hash = role === 'admin' ? '#/admin' : '#/dashboard';
               }, 100);
             }
-          });
-        }
+          }
+        });
       } else {
         setProfile(null);
       }
+
       setLoading(false);
     });
 
@@ -130,6 +175,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     profile,
     loading,
+    verificationMessage,
+    clearVerificationMessage,
     signIn,
     signUp,
     signOut,
